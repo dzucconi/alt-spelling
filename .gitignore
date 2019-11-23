@@ -1,6 +1,12 @@
 .DS_Store
-archive
 processed/*
 !processed/.gitkeep
 source/*
 !source/.gitkeep
+*.pyc
+
+# Meta
+catalog/
+selects/
+archive/
+printqueue/
