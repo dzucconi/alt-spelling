@@ -10,18 +10,20 @@ size = 2000, 2000
 
 progress = ChargingBar('Processing', max=len(filenames))
 
+
 def format(path):
-  progress.next()
-  img = Image.open(path)
-  width, height = img.size
+    progress.next()
+    img = Image.open(path)
+    width, height = img.size
 
-  print_width = f'{round(width / 300, 2)}in'
-  print_height = f'{round(height / 300, 2)}in'
+    print_width = f'{round(width / 300, 2)}in'
+    print_height = f'{round(height / 300, 2)}in'
 
-  filename = path.split('/')[-1]
-  new_filename = f'./catalog/{print_width}x{print_height}__{filename}'
-  img.thumbnail(size, Image.ANTIALIAS)
-  img.save(new_filename, 'PNG')
+    filename = path.split('/')[-1]
+    new_filename = f'./catalog/{print_width}x{print_height}__{filename}'
+    img.thumbnail(size, Image.ANTIALIAS)
+    img.save(new_filename, 'PNG')
+
 
 images = list(map(format, filenames))
 
