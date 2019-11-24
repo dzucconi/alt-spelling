@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
+import argparse
 import sys
 import random
 import time
+import size
 import size
 import hue
 import numpy as np
@@ -10,16 +12,33 @@ from PIL import Image
 from progress.bar import ChargingBar
 from glob import glob
 
+parser = argparse.ArgumentParser()
+
+parser.add_argument('--width', help='Target width in inches',
+                    default=30, type=float)
+parser.add_argument('--height', help='Target height in inches',
+                    default=36.667, type=float)
+parser.add_argument(
+    '--size', help='Size in pixels to slice tiles', default=13, type=int)
+parser.add_argument('--dpi', help='Target dots per inch',
+                    default=300, type=int)
+parser.add_argument('--anchor', help='Crop anchor position', default='center')
+parser.add_argument('--filename', help='Output filename',
+                    default=f'output_{int(time.time())}')
+parser.add_argument('--dir', help='Directory to process',
+                    default='source/example/*.jpg')
+parser.add_argument('--hue', help="Rotate hues",
+                    default=False, type=bool)
+
+args = parser.parse_args()
+
 CONFIG = {
-    'width': 9000,  # 30
-    'height': 11000,  # 36.667
-    'size': 15,
-    'anchor': 'center',
-    'filename': f'output_{int(time.time())}',
-    'images':  list(map(Image.open, glob('source/x/*.jpg'))) +
-    [
-        Image.open('source/x.jpg'),
-    ],
+    'width': int(args.width * args.dpi),
+    'height': int(args.height * args.dpi),
+    'size': args.size,
+    'anchor': args.anchor,
+    'filename': args.filename,
+    'images':  list(map(Image.open, glob(args.dir)))
 }
 
 np.random.shuffle(CONFIG.get('images'))
@@ -27,12 +46,12 @@ np.random.shuffle(CONFIG.get('images'))
 cropping_bar = ChargingBar('Cropping', max=len(CONFIG.get('images')))
 
 
-def cropit(img):
+def crop(img):
     cropping_bar.next()
     return size.crop(img, (CONFIG.get('width'), CONFIG.get('height')), anchor=CONFIG.get('anchor'))
 
 
-CROPPED = list(map(cropit, CONFIG.get('images')))
+CROPPED = list(map(crop, CONFIG.get('images')))
 
 cropping_bar.finish()
 
@@ -63,19 +82,14 @@ processing_bar = ChargingBar('Processing', max=len(coords))
 for i, box in enumerate(coords, start=1):
     processing_bar.next()
 
-    # new_row = box[0] == 0
-    # if new_row:
-    #     # offset = (rows % (len(SET) // 2))
-    #     offset = rows % len(SET)
-    #     rows = rows + 1
-
     which = (i + offset) % len(SET)
 
-    # degree =  360 / ((i % (len(SET) - 1.0)) + 1.0)
-    # degree =  360 / (i % (len(SET)) + 1.0)
-    # degree = (90, 180, 270, 0)[i % 4]
-    # crop = SET[which].crop(box)
-    # colored = hue.colorize(crop, degree)
+    if (args.hue):
+        degree = 360 / ((i % (len(SET) - 1.0)) + 1.0)
+        degree = 360 / (i % (len(SET)) + 1.0)
+        degree = (90, 180, 270, 0)[i % 4]
+        crop = SET[which].crop(box)
+        colored = hue.colorize(crop, degree)
 
     crop = SET[which].crop(box)
     output.paste(crop, box)
@@ -83,5 +97,7 @@ for i, box in enumerate(coords, start=1):
 processing_bar.finish()
 
 print('Saving...')
+
 output.save(f'processed/{CONFIG.get("filename")}.png', 'PNG', quality=100)
+
 print('Done.')
