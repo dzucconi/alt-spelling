@@ -12,6 +12,8 @@ from PIL import Image
 from progress.bar import ChargingBar
 from glob import glob
 
+Image.MAX_IMAGE_PIXELS = None
+
 parser = argparse.ArgumentParser()
 
 parser.add_argument('--width', help='Target width in inches',
