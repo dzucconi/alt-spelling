@@ -11,6 +11,7 @@ import numpy as np
 from PIL import Image
 from progress.bar import ChargingBar
 from glob import glob
+from pync import Notifier
 
 Image.MAX_IMAGE_PIXELS = None
 
@@ -103,3 +104,5 @@ print('Saving...')
 output.save(f'processed/{CONFIG.get("filename")}.png', 'PNG', quality=100)
 
 print('Done.')
+
+Notifier.notify('Done.')
